@@ -1,0 +1,6 @@
+{
+  "name": "דשבורד חדשות שוק ההון",
+  "description": "דשבורד אישי המציג חדשות כלכליות עדכניות מהאתרים כלכליסט, גלובס, ביזפורטל, ynet כלכלה, ו-TheMarker.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
