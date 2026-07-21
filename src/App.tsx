@@ -19,11 +19,83 @@ import {
   ListFilter
 } from "lucide-react";
 
+const FALLBACK_NEWS_CLIENT: NewsItem[] = [
+  {
+    id: "fb-1",
+    title: "המסחר בת\"א ננעל בעליות שערים: מדד ת\"א 35 עלה ב-0.9%, ת\"א 125 ב-1.1%",
+    summary: "הבורסה המקומית הגיבה בחיוב למגמה החיובית מעבר לים ולדוחות הבנקים המרשימים שפורסמו הבוקר. מחזור המסחר היה ער במיוחד.",
+    url: "https://www.bizportal.co.il",
+    source: "ביזפורטל",
+    sentiment: "חיובי",
+    category: "מניות",
+    publishedTime: "לפני חצי שעה"
+  },
+  {
+    id: "fb-2",
+    title: "הייטק ישראלי בתנופה: גיוסי ההון ברבעון השני חצו את רף ה-1.5 מיליארד דולר",
+    summary: "השקעות זרות מסיביות בסטארטאפים בתחום הסייבר והבינה המלאכותית בישראל מסמנות התאוששות מהירה של ענף הטכנולוגיה המקומי.",
+    url: "https://www.themarker.com",
+    source: "TheMarker",
+    sentiment: "חיובי",
+    category: "הייטק",
+    publishedTime: "לפני שעה"
+  },
+  {
+    id: "fb-3",
+    title: "מדד מחירי הדיור רושם ירידה מפתיעה של 0.3%; האם הריבית הגבוהה עושה את שלה?",
+    summary: "הלשכה המרכזית לסטטיסטיקה מדווחת על בלימה בקצב עליית המחירים, לצד עלייה קלה בהיצע הדירות החדשות הלא מכורות בשוק.",
+    url: "https://www.globes.co.il",
+    source: "גלובס",
+    sentiment: "שלילי",
+    category: "נדל\"ן",
+    publishedTime: "לפני שעתיים"
+  },
+  {
+    id: "fb-4",
+    title: "בנק לאומי מציג רווח נקי מטורף של 1.95 מיליארד שקל ברבעון ומחלק דיבידנד ענק",
+    summary: "הדוחות הכספיים של הבנק משקפים עלייה בהכנסות מריבית וצמיחה חזקה בתיק האשראי, המאפשרת חלוקת רווחים נדיבה לבעלי המניות.",
+    url: "https://www.calcalist.co.il",
+    source: "כלכליסט",
+    sentiment: "חיובי",
+    category: "מניות",
+    publishedTime: "לפני 3 שעות"
+  },
+  {
+    id: "fb-5",
+    title: "בנק ישראל צפוי להותיר את הריבית ללא שינוי ברמתה הנוכחית של 4.5%",
+    summary: "כלכלנים מעריכים כי על אף התמתנות מסוימת באינפלציה, הנגיד יבחר לנקוט במדיניות זהירה על רקע הגירעון הממשלתי ואי-הוודאות הגיאופוליטית.",
+    url: "https://www.ynet.co.il",
+    source: "ynet כלכלה",
+    sentiment: "נייטרלי",
+    category: "מאקרו",
+    publishedTime: "לפני 4 שעות"
+  },
+  {
+    id: "fb-6",
+    title: "מניית אנבידיה מזנקת בניו יורק בעקבות ביקוש חסר תקדים לשבבי ה-Blackwell החדשים",
+    summary: "ענקיות הטכנולוגיה ממשיכות להצטייד בחומרה המתקדמת של אנבידיה לאימון מודלי בינה מלאכותית, מה שמזניק את שווי השוק שלה לשיאים חדשים.",
+    url: "https://www.bizportal.co.il",
+    source: "ביזפורטל",
+    sentiment: "חיובי",
+    category: "הייטק",
+    publishedTime: "לפני 5 שעות"
+  }
+];
+
+const FALLBACK_INDICES_CLIENT: MarketIndex[] = [
+  { name: "ת\"א 35", value: "2,084.50", change: "+0.92%", isPositive: true },
+  { name: "ת\"א 125", value: "2,198.15", change: "+1.12%", isPositive: true },
+  { name: "S&P 500", value: "5,420.30", change: "+0.45%", isPositive: true },
+  { name: "נאסד\"ק", value: "18,912.40", change: "+0.78%", isPositive: true },
+  { name: "דולר / שקל", value: "3.6320", change: "-0.41%", isPositive: true },
+  { name: "אירו / שקל", value: "3.9480", change: "-0.25%", isPositive: true }
+];
+
 export default function App() {
-  const [news, setNews] = useState<NewsItem[]>([]);
-  const [indices, setIndices] = useState<MarketIndex[]>([]);
-  const [loadingNews, setLoadingNews] = useState(true);
-  const [loadingIndices, setLoadingIndices] = useState(true);
+  const [news, setNews] = useState<NewsItem[]>(FALLBACK_NEWS_CLIENT);
+  const [indices, setIndices] = useState<MarketIndex[]>(FALLBACK_INDICES_CLIENT);
+  const [loadingNews, setLoadingNews] = useState(false);
+  const [loadingIndices, setLoadingIndices] = useState(false);
   
   // Filtering and search state
   const [searchQuery, setSearchQuery] = useState("");
@@ -38,18 +110,21 @@ export default function App() {
   const [loadingChat, setLoadingChat] = useState(false);
 
   // Meta stats
-  const [newsSourceMeta, setNewsSourceMeta] = useState<"live" | "fallback" | "cache" | null>(null);
+  const [newsSourceMeta, setNewsSourceMeta] = useState<"live" | "fallback" | "cache" | null>("cache");
 
   // Fetch news data
   const fetchNews = async () => {
     setLoadingNews(true);
     try {
       const res = await fetch("/api/news");
+      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
       const data = await res.json();
-      setNews(data.data || []);
-      setNewsSourceMeta(data.source);
+      if (data && data.data && data.data.length > 0) {
+        setNews(data.data);
+        setNewsSourceMeta(data.source);
+      }
     } catch (err) {
-      console.error("Failed to fetch news:", err);
+      console.error("Failed to fetch news from server API:", err);
     } finally {
       setLoadingNews(false);
     }
@@ -60,10 +135,13 @@ export default function App() {
     setLoadingIndices(true);
     try {
       const res = await fetch("/api/indices");
+      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
       const data = await res.json();
-      setIndices(data.data || []);
+      if (data && data.data && data.data.length > 0) {
+        setIndices(data.data);
+      }
     } catch (err) {
-      console.error("Failed to fetch indices:", err);
+      console.error("Failed to fetch indices from server API:", err);
     } finally {
       setLoadingIndices(false);
     }
